@@ -1,12 +1,16 @@
 package kopo.poly;
 
+import kopo.poly.dto.NlpDTO;
 import kopo.poly.dto.OcrDTO;
+import kopo.poly.service.INlpService;
 import kopo.poly.service.IOcrService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+import java.util.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -18,6 +22,7 @@ public class AiJavaPrjApplication implements CommandLineRunner {
     //메모리에 올라간 OcrService 객체를 ocrService 변수에 객체 넣어주기
 
     private final IOcrService ocrService; // 이미지 인식
+    private final INlpService nlpService; // 자연어 처리
     public static void main(String[] args) {
         SpringApplication.run(AiJavaPrjApplication.class, args);
     }
@@ -28,7 +33,7 @@ public class AiJavaPrjApplication implements CommandLineRunner {
         log.info("자바 프로그래밍 시작!!");
 
         String filePath = "image"; // 문자열을 인식할 이미지 파일 경로
-        String fileName = "sample02.png"; // 문자열을 인식할 이미지 파일 이름
+        String fileName = "sample01.jpg"; // 문자열을 인식할 이미지 파일 이름
 
         // 전달한 값(parameter) 약자로 보통 변수명 앞에 p을 붙임 ==> pDTO
         OcrDTO pDTO = new OcrDTO();
@@ -45,6 +50,44 @@ public class AiJavaPrjApplication implements CommandLineRunner {
         log.info(result);
 
         log.info("자바 프로그램 종료!!");
+
+        log.info("-------------------------------------------------");
+        NlpDTO nlpDTO = nlpService.getPlanText(result);
+        log.info("형태소별 품사 분석 결과 : " + nlpDTO.getResult());
+
+        //명사 추출 결과
+        nlpDTO = nlpService.getNouns(result);
+
+        List<String> nouns = nlpDTO.getNouns();
+
+        //중복을 포함하는 List 구조의 nouns 객체의 값들의 중복제거
+        //set 구조는 중복을 허용하지 않기 때문에 List -> Set 구조로 변환하면 자동으로 중복된 값은 제거됨
+        Set<String> distinct = new HashSet<>(nouns);
+
+        log.info("중복 제거 수행 전 단어 수 : " + nouns.size());
+        log.info("중복 제거 수행 후 단어 수 : " + distinct.size());
+
+        //단어, 빈도수를 map 구조로 저장하기 위해 객체 생성
+        //Map 구조의 키는 중복 불가능(값은 중복 가능)
+        Map<String, Integer> rMap = new HashMap<>();
+
+        //중복제거된 전체 단어마다 반복하기
+        for(String s : distinct){
+            int count = Collections.frequency(nouns, s); // 단어 빈도수
+            rMap.put(s, count); // 단어, 빈도 수를 Map 구조로 저장
+
+            log.info(s + " : " + count);
+        }
+        // 빈도 수 결과를 정렬하기
+        // 정렬을 위해 맵에 저장된 레코드 1개(키, 값)을 리스트 구조로 변경하기
+        List<Map.Entry<String, Integer>> sortResult = new LinkedList<>(rMap.entrySet());
+
+        // 저장된 List 결과를 정렬하기
+        Collections.sort(sortResult, ((o1, o2) -> o2.getValue().compareTo(o1.getValue())));
+
+        log.info("가장 많이 사용된 단어는? : " + sortResult);
+
+        log.info("자바 프로그래밍 종료!!");
 
     }
 }
