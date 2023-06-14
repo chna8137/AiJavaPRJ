@@ -10,6 +10,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -92,6 +93,7 @@ public class AiJavaPrjApplication implements CommandLineRunner {
         List<StudentDTO> rList; // DB 조회 결과를 표현
 
         // 학생 등록하기
+
         pDTO = new StudentDTO();
 
         pDTO.setUserId("hglee67");
@@ -100,7 +102,23 @@ public class AiJavaPrjApplication implements CommandLineRunner {
         pDTO.setAddr("서울");
 
         rList = studentService.insertStudent(pDTO);
-        studentService.deleteStudent(pDTO);
+//        studentService.deleteStudent(pDTO);
+
+        rList.forEach(dto -> {
+            log.info("DB에 저장된 아이디 : " + dto.getUserId());
+            log.info("DB에 저장된 이름 : " + dto.getUserName());
+            log.info("DB에 저장된 이메일 : " + dto.getEmail());
+            log.info("DB에 저장된 주소 : " + dto.getAddr());
+        });
+        // 학생 수정하기
+        pDTO = new StudentDTO();
+
+        pDTO.setUserId("hglee67"); // PK 칼럼인 회원 아이디를 기준으로 데이터를 수정함
+        pDTO.setUserName("이협건_수정");
+        pDTO.setEmail("hglee67@kopo.ac.kr_수정");
+        pDTO.setAddr("서울_수정");
+
+        rList = studentService.updateStudent(pDTO);
 
         rList.forEach(dto -> {
             log.info("DB에 저장된 아이디 : " + dto.getUserId());
@@ -109,7 +127,44 @@ public class AiJavaPrjApplication implements CommandLineRunner {
             log.info("DB에 저장된 주소 : " + dto.getAddr());
         });
 
+        // 학생 삭제하기
+        pDTO = new StudentDTO();
 
+        pDTO.setUserId("hglee67");
+
+        rList = studentService.deleteStudent(pDTO);
+
+        rList.forEach(dto ->{
+            log.info("DB에 저장된 아이디 : " + dto.getUserId());
+            log.info("DB에 저장된 이름 : " + dto.getUserName());
+            log.info("DB에 저장된 이메일 : " + dto.getEmail());
+            log.info("DB에 저장된 주소 : " + dto.getAddr());
+        });
+
+        //여기에 학생 정보 DTO를 여러개 만들어서 list 넣고, 서비스 호출
+        List<StudentDTO> pList = new ArrayList<>();
+
+        for (int i = 0; i < 5; i++) {
+            StudentDTO myDTO = new StudentDTO();
+
+            myDTO.setUserId(String.valueOf(i));
+            myDTO.setUserName(String.valueOf(i));
+            myDTO.setEmail(String.valueOf(i));
+            myDTO.setAddr(String.valueOf(i));
+            pList.add(myDTO);
+
+            myDTO = null;
+        }
+
+//        rList = studentService.getStudentList();
+//        loggingDatabase(rList);
+
+        studentService.insertStudentList(pList);
+//        rList = studentService.getStudentList();
+//        loggingDatabase(rList);
+
+
+        // pList를 파라미터로 서비스 호출하기
 
 
         log.info("자바 프로그래밍 종료!!");

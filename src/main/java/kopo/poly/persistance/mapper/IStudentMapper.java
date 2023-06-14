@@ -18,6 +18,8 @@ public interface IStudentMapper {
 //     *
 //     * @param pDTO 등록할 학생 정보
     void insertStudent(StudentDTO pDTO) throws Exception;
+    void insertStudentList(List<StudentDTO> pList) throws Exception;
+    void updateStudent(StudentDTO pDTO) throws Exception;
     void deleteStudent(StudentDTO pDTO) throws Exception; // 학생 삭제 쿼리
 
     // 학생 전체 조회 쿼리
